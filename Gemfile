@@ -5,6 +5,7 @@ gem 'activerecord'
 gem 'sinatra'
 
 gem 'sinatra-activerecord'
+gem 'sinatra-active-model-serializers'
 
 group :production do
   gem 'pg'

@@ -1,11 +1,16 @@
 require 'rubygems'
 require 'bundler'
 require 'bundler/setup'
+require 'json'
+require 'sinatra/json'
 Bundler.require
 
 require './config/environments'
 
 require './model/joke'
+require './serializers/joke_serializer'
+
+register Sinatra::ActiveRecordExtension
 
 before do
   content_type :json
@@ -13,7 +18,7 @@ before do
 end
 
 get '/jokes' do
-  Joke.all.to_json
+  json Joke.all, root: false
 end
 
 post '/jokes' do
@@ -34,7 +39,7 @@ get '/jokes/:id' do
     return
   end
 
-  @joke.to_json
+  json @joke, root: false
 end
 
 put '/jokes/:id' do
