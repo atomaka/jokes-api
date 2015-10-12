@@ -20,7 +20,7 @@ post '/jokes' do
   @joke = Joke.new(params[:joke])
 
   if @joke.save
-    status 204
+    status 201
   else
     status 422
   end
