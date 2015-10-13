@@ -6,6 +6,8 @@ gem 'sinatra'
 
 gem 'sinatra-activerecord'
 
+gem 'grape'
+
 group :production do
   gem 'pg'
 end

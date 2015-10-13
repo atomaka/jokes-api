@@ -7,58 +7,53 @@ require './config/environments'
 
 require './model/joke'
 
-before do
-  content_type :json
-  response.headers['Access-Control-Allow-Origin'] = '*'
-end
+class Jokes < Grape::API
+  format :json
 
-get '/jokes' do
-  Joke.all.to_json
-end
-
-post '/jokes' do
-  @joke = Joke.new(params[:joke])
-
-  if @joke.save
-    status 201
-  else
-    status 422
-  end
-end
-
-get '/jokes/:id' do
-  begin
-    @joke = Joke.find(params[:id])
-  rescue Exception
-    status 404
-    return
+  rescue_from ActiveRecord::RecordNotFound do |e|
+    rack_response('{ "status": 404, "message": "Not Found." }', 404)
   end
 
-  @joke.to_json
-end
+  resource :jokes do
+    desc 'Return all jokes'
+    get do
+      Joke.all
+    end
 
-put '/jokes/:id' do
-  begin
-    @joke = Joke.find(params[:id])
-  rescue Exception
-    status 404
-    return
+    desc 'Create new joke'
+    params do
+      requires :joke, type: String, desc: 'Joke'
+      requires :punchline, type: String, desc: 'Punchline'
+    end
+    post do
+      Joke.create!(
+        joke: params[:joke],
+        punchline: params[:punchline]
+      )
+    end
+
+    route_param :id do
+      desc 'View a single joke'
+      get do
+        Joke.find(params[:id])
+      end
+
+      desc 'Update a joke'
+      params do
+        requires :joke, type: String, desc: 'Joke'
+        requires :punchline, type: String, desc: 'Punchline'
+      end
+      put do
+        Joke.find(params[:id]).update({
+          joke: params[:joke],
+          punchline: params[:punchline]
+        })
+      end
+
+      desc 'Delete a joke'
+      delete do
+        Joke.find(params[:id]).delete
+      end
+    end
   end
-
-  if @joke.update(params[:joke])
-    status 204
-  else
-    status 422
-  end
-end
-
-delete '/jokes/:id' do
-  begin
-    @joke = Joke.find(params[:id])
-
-    @joke.delete
-  rescue Exception
-  end
-
-  status 204
 end
